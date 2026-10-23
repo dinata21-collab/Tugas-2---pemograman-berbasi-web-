@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stok Bahan Ajar - SITTA UT</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <div id="app" class="max-w-5xl mx-auto px-4 py-8">
+        <nav class="mb-6 flex justify-between items-center">
+            <a href="index.html" class="text-blue-600 hover:underline font-medium">&larr; Kembali ke Beranda</a>
+            <span class="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold">Modul 1: Stok Bahan Ajar</span>
+        </nav>
+
+        <header class="bg-white rounded-xl shadow p-6 mb-6">
+            <h1 class="text-2xl font-bold text-slate-800">Manajemen & Katalog Stok Bahan Ajar</h1>
+            <p class="text-slate-500 text-sm">Gunakan pencarian dan filter di bawah untuk memantau tiras dan ketersediaan buku.</p>
+        </header>
+
+        <div class="bg-white rounded-xl shadow p-6 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div class="w-full md:w-1/2">
+                <input type="text" v-model="searchQuery" placeholder="Cari berdasarkan kode atau nama matakuliah..." 
+                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="w-full md:w-1/4">
+                <select v-model="selectedKategori" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Kategori</option>
+                    <option v-for="kat in daftarKategori" :value="kat">{{ kat }}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow overflow-hidden mb-8">
+            <table class="w-full border-collapse text-left">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-600 text-xs uppercase font-semibold">
+                        <th class="p-4">Kode</th>
+                        <th class="p-4">Nama Matakuliah</th>
+                        <th class="p-4">Edisi</th>
+                        <th class="p-4">Kategori</th>
+                        <th class="p-4 text-center">Stok</th>
+                        <th class="p-4 text-right">Harga</th>
+                        <th class="p-4 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-sm">
+                    <tr v-for="item in filteredStok" :key="item.kode" class="hover:bg-slate-50">
+                        <td class="p-4 font-mono font-medium text-blue-600" v-text="item.kode"></td>
+                        <td class="p-4 font-semibold text-slate-800" v-text="item.nama"></td>
+                        <td class="p-4 text-slate-500" v-text="item.edisi"></td>
+                        <td class="p-4 text-slate-600" v-text="item.kategori"></td>
+                        <td class="p-4 text-center">
+                            <span :class="{'text-red-600 font-bold': item.stok <= 10, 'text-slate-700': item.stok > 10}" v-text="item.stok"></span>
+                        </td>
+                        <td class="p-4 text-right font-medium text-slate-700">{{ formatRupiah(item.harga) }}</td>
+                        <td class="p-4 text-center">
+                            <span v-if="item.stok > 15" class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-medium">Tersedia</span>
+                            <span v-else-if="item.stok > 0 && item.stok <= 15" class="bg-amber-100 text-amber-700 text-xs px-2.5 py-1 rounded-full font-medium">Stok Menipis</span>
+                            <span v-else class="bg-red-100 text-red-700 text-xs px-2.5 py-1 rounded-full font-medium">Kosong</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4">Tambah Data Bahan Ajar Baru</h2>
+            <form @submit.prevent="tambahBahanAjar" class="grid md:grid-cols-3 gap-4">
+                <input type="text" v-model="formBaru.kode" placeholder="Kode MK" required class="px-3 py-2 border rounded-lg text-sm">
+                <input type="text" v-model="formBaru.nama" placeholder="Nama Matakuliah" required class="px-3 py-2 border rounded-lg text-sm">
+                <input type="text" v-model="formBaru.edisi" placeholder="Edisi" required class="px-3 py-2 border rounded-lg text-sm">
+                <input type="text" v-model="formBaru.kategori" placeholder="Kategori" required class="px-3 py-2 border rounded-lg text-sm">
+                <input type="number" v-model.number="formBaru.stok" placeholder="Jumlah Stok" required class="px-3 py-2 border rounded-lg text-sm">
+                <input type="number" v-model.number="formBaru.harga" placeholder="Harga (Rp)" required class="px-3 py-2 border rounded-lg text-sm">
+                <div class="md:col-span-3 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg text-sm transition">Simpan Stok</button>
+                </div>
+            </form>
+            <p v-if="pesanNotifikasi" class="mt-3 text-xs text-blue-600 font-medium" v-text="pesanNotifikasi"></p>
+        </div>
+    </div>
+    <script src="js/dataBahanAjar.js"></script>
+    <script src="js/stok-app.js"></script>
+</body>
+</html>
